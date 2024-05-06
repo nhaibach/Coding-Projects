@@ -1,0 +1,210 @@
+#########Bath County Water Quality analysis looking at DO/ Temp/ daily average DO#####################
+
+
+library(tidyverse)
+library(lubridate)
+library(fBasics)
+library(dplyr)
+library(ggplot2)
+install.packages("ggplot2")
+
+##BC Analysis
+BCWQ$month <- format(as.Date(BCWQ$Date_Time, format="%d/%m/%Y"),"%m")
+BCWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            max= max(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            median = median(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`Back Creek DO (mg/L)`, na.rm = TRUE))
+BCWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Back Creek Water Temperature (deg C)`, na.rm = TRUE))
+BCWQ %>%
+  summarize(min = min(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            max= max(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            median = median(`Back Creek DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`Back Creek DO (mg/L)`, na.rm = TRUE))
+BCWQ %>% 
+  summarize(min = min(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Back Creek Water Temperature (deg C)`, na.rm = TRUE))
+
+###Hourly DO BC graph
+ggplot(BCWQ, aes(x = Date_Time, y = `Back Creek DO (mg/L)`, col="DO Hourly")) +
+  geom_line()+
+  geom_hline(aes(col = "DO Standard", yintercept = 5), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Hourly"= "black", "DO Standard"= "red"))+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  xlab("Month-Year")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month") +
+  theme_bw()+ theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+
+###hourly temperature
+ggplot(data =BCWQ, aes(x=Date_Time, y=`Back Creek Water Temperature (deg C)`, col= "Temperature Hourly"))+
+  geom_line()+
+  geom_hline(aes(col = "Temperature Standard", yintercept = 21), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("Temperature Hourly"= "black", "Temperature Standard"= "red"))+
+  scale_y_continuous(name="Temp (C)",limits=c(0,32), breaks = seq(0,30, by = 10))+
+   theme_bw()+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+  
+##Average DO Graph
+BCWQ$day <- floor_date(BCWQ$Date_Time, "day")
+
+BCDA <- BCWQ %>%
+  group_by(day) %>%
+  summarize(daily_average = mean(`Back Creek DO (mg/L)`, na.rm = TRUE))
+
+ggplot(BCDA, aes(x = `day`,  y = daily_average, col= "DO Daily Average")) +
+  geom_line() +
+  geom_hline(aes(col = "DO Standard", yintercept = 6), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Daily Average"= "black", "DO Standard"= "red"))+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()+ theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+###LBC Analysis
+
+LBCWQ$month <- format(as.Date(LBCWQ$Date_Time, format="%d/%m/%Y"),"%m")
+LBCWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            max= max(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            median = median(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`Little Back Creek DO (mg/L)`, na.rm = TRUE))
+LBCWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE))
+LBCWQ %>%
+  summarize(min = min(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            max= max(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            median = median(`Little Back Creek DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`Little Back Creek DO (mg/L)`, na.rm = TRUE))
+LBCWQ %>% 
+  summarize(min = min(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Little Back Creek Water Temperature (deg C)`, na.rm = TRUE))
+###Hourly DO
+ggplot(LBCWQ, aes(x = `Date_Time`,  y = `Little Back Creek DO (mg/L)`, col="DO Hourly")) +
+  geom_line() +
+  geom_hline(aes(col = "DO Standard", yintercept = 6), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Hourly"= "black", "DO Standard"= "red"))+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  theme_bw()+  theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+##Temperature graph
+ggplot(data =LBCWQ, aes(x=Date_Time, y=`Little Back Creek Water Temperature (deg C)`, col= "Temperature Hourly"))+
+  geom_line()+
+  geom_hline(aes(col = "Temperature Standard", yintercept = 20), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("Temperature Hourly"= "black", "Temperature Standard"= "red"))+
+  scale_y_continuous(name="Temp (C)",limits=c(0,32), breaks = seq(0,30, by = 10))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+###Creating average per day DO
+LBCWQ$day <- floor_date(LBCWQ$Date_Time, "day")
+
+LBCDA <- LBCWQ %>%
+  group_by(day) %>%
+  summarize(daily_average = mean(`Little Back Creek DO (mg/L)`, na.rm = TRUE))
+
+
+ggplot(LBCDA, aes(x = `day`,  y = daily_average, col= "DO Daily Average")) +
+  geom_line() +
+  geom_hline(aes(col = "DO Standard", yintercept = 7), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Daily Average"= "black", "DO Standard"= "red"))+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()+ theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+###Diversion Analysis
+
+DWQ$month <- format(as.Date(DWQ$Date_Time, format="%d/%m/%Y"),"%m")
+DWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`DO (mg/L)`, na.rm = TRUE),
+            max= max(`DO (mg/L)`, na.rm = TRUE),
+            median = median(`DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`DO (mg/L)`, na.rm = TRUE))
+DWQ %>% 
+  group_by(month)%>%
+  summarize(min = min(`Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Water Temperature (deg C)`, na.rm = TRUE))
+DWQ %>%
+  summarize(min = min(`DO (mg/L)`, na.rm = TRUE),
+            max= max(`DO (mg/L)`, na.rm = TRUE),
+            median = median(`DO (mg/L)`, na.rm = TRUE),
+            mean = mean(`DO (mg/L)`, na.rm = TRUE))
+DWQ %>% 
+  summarize(min = min(`Water Temperature (deg C)`, na.rm = TRUE),
+            max = max(`Water Temperature (deg C)`, na.rm = TRUE),
+            median = median(`Water Temperature (deg C)`, na.rm = TRUE),
+            mean = mean(`Water Temperature (deg C)`, na.rm = TRUE))
+
+###Hourly DO
+
+ggplot(DWQ, aes(x = `Date_Time`,  y = `DO (mg/L)`, col="DO Hourly")) +
+  geom_line() +
+  geom_hline(aes(col = "DO Standard", yintercept = 6), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Hourly"= "black", "DO Standard"= "red"))+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  theme_bw()+  theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+
+##Temperature graph
+ggplot(data =DWQ, aes(x=Date_Time, y=`Water Temperature (deg C)`, col= "Temperature Hourly"))+
+  geom_line()+
+  geom_hline(aes(col = "Temperature Standard", yintercept = 21), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("Temperature Hourly"= "black", "Temperature Standard"= "red"))+
+  scale_y_continuous(name="Temp (C)",limits=c(0,32), breaks = seq(0,30, by = 10))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
+###Creating average per day DO
+DWQ$day <- floor_date(DWQ$Date_Time, "day")
+
+DDA <- DWQ %>%
+  group_by(day) %>%
+  summarize(daily_average = mean(`DO (mg/L)`, na.rm = TRUE))
+
+ggplot(DDA, aes(x = `day`,  y = daily_average, col= "DO Daily Average")) +
+  geom_line() +
+  geom_hline(aes(col = "DO Standard", yintercept = 7), linetype = "dashed", show.legend = TRUE) +
+  scale_color_manual("Legend",values = c("DO Daily Average"= "black", "DO Standard"= "red"))+
+  xlab("Month-Year")+
+  scale_x_datetime(date_labels = "%b-2023", date_breaks = "1 month")+
+  scale_y_continuous(name="DO (mg/L)",limits=c(0,14), breaks = seq(0, 14, by = 2))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()+ theme(legend.position = c(0.03, 0.03), legend.justification = c(0.03,0.03))
+
