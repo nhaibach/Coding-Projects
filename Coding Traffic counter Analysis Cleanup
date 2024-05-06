@@ -1,0 +1,120 @@
+#######################################
+#Bath County cleaning outliers caused by grass then analysis
+#Nicole Haibach
+# 20240124
+#######################################
+#Libraries
+#diplyr
+library(diplyr)
+#plyr
+library(plyr)
+#tidyverse
+library(tidyverse)
+#factoextra
+library(factoextra)
+library(lubridate)
+library(writexl)
+########################################
+
+#Original data boxplot to view outliers
+CtoBC_bpo <- boxplot(BCAll$CtoBC, xlab ="CtoBC")
+
+#Refresh data
+CtoBC<- BCAll$CtoBC
+
+
+
+#Change na to median of data set (can also do with mean depending on the spread of your data)
+CtoBC[is.na(CtoBC)]<-median(CtoBC, na.rm = TRUE)
+
+
+#This sets the data to change outliers who are within 2 sd of mean to mean value
+threshold <- 2
+outliers <- CtoBC > mean(CtoBC) + threshold * sd(CtoBC) | CtoBC < mean(CtoBC) - threshold * sd(CtoBC)
+print(outliers)
+
+# Replace outliers with mean values
+CtoBC[outliers] <- mean(CtoBC[!outliers])
+print(CtoBC)
+
+#final boxplot to show new spread of outliers
+CtoBC_bp <- boxplot(CtoBC, xlab ="CtoBC")
+
+
+#Creates excel file with new data
+BCTrail$CtoBC <- CtoBC
+file_path <- "C:/Users/Nicole Haibach/OneDrive - Kleinschmidt Associates, Inc/Desktop/CtoBC.xlsx"
+write_xlsx(BCTrail, file_path)
+
+##Sediment Pond Trail
+
+#Original data boxplot
+SPT_bpo <- boxplot(BCAll$SedimentPondTrail, xlab ="Sediment Pond")
+
+#Refresh data
+SPT<- BCAll$SedimentPondTrail
+
+#final boxplot
+SPT_bp <- boxplot(SPT, xlab ="Sediment Pond")
+
+#Change na to median of data set
+SPT[is.na(SPT)]<-median(SPT, na.rm = TRUE)
+sd(SPT)
+
+#This sets the data to change outliers who are within a .25 of the sd of mean to mean value
+threshold <- .5
+outliers <- SPT > mean(SPT) + threshold * sd(SPT) | SPT < mean(SPT) - threshold * sd(SPT)
+print(outliers)
+
+# Replace outliers with mean values
+SPT[outliers] <- mean(SPT[!outliers])
+print(SPT)
+
+
+
+#Creates excel file with new data
+BCTrail$SPT <- SPT
+file_path <- "C:/Users/Nicole Haibach/OneDrive - Kleinschmidt Associates, Inc/Desktop/SPT.xlsx"
+write_xlsx(BCTrail, file_path)
+
+###Normal Trail Counter Analysis
+
+#makes sure your date is set to a date format
+BCTrail$Date <- as.Date(BCTrail$Date)
+
+# Compute DAYOFWEEK
+BCTrail$DAYOFWEEK <- format(BCTrail$Date, "%A")
+
+# Recode DAYOFWEEK into DAYTYPE
+BCTrail$DAYTYPE <- recode(BCTrail$DAYOFWEEK, "Monday"=1, "Tuesday"=1, "Wednesday"=1, "Thursday"=1, "Friday"=1, "Saturday"=2, "Sunday"=2)
+
+# Recode HOLIDAY DAYTYPE (this is for memorial, independence and labor day)
+holidays <- as.Date(c("2023-05-27", "2023-05-28", "2023-05-29", "2023-07-01", "2023-07-02", 
+                      "2023-07-03", "2023-07-04", "2023-09-04", "2023-09-02", "2023-09-03"))
+BCTrail$DAYTYPE[BCTrail$Date %in% holidays] <- 3
+
+# Compute MONTH
+BCTrail$MONTH <- month(BCTrail$Date)
+
+# Compute number of trips past counter
+BCTrail <- BCTrail %>%
+  mutate(TRIP = CtoBC / 2)
+
+# Summarize by MONTH and DAYTYPE using group_by and summarize
+summary_sum <- BCTrail %>%
+  group_by(MONTH, DAYTYPE) %>%
+  summarise(SUM_PEOPLE = sum(CtoBC),
+            SUM_TRIP = sum(TRIP))
+
+# Summarize means by MONTH and DAYTYPE using group_by and summarize
+summary_mean <- BCTrail %>%
+  group_by(MONTH, DAYTYPE) %>%
+  summarise(MEAN_PEOPLE = mean(CtoBC),
+            MEAN_TRIP = mean(TRIP))
+
+# Print the results
+print("Summarized Data (Sums):")
+print(summary_sum)
+
+print("Summarized Data (Means):")
+print(summary_mean)
