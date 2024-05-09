@@ -1,0 +1,82 @@
+
+# Create the data frame
+UA <- data.frame(
+  activity = c("Trails", "Bridges", "Restrooms", "Parking", "Picnic Areas", "Campsites", "Fishing Areas", "Cleanliness"),
+  Very_Poor = c(0.003, 0.003, 0.009, 0.004, 0.0, 0.0, 0.061, 0.0),
+  Poor = c(0.006, 0.003, 0.061, 0.0, 0.0, 0.0, 0.061, 0.003),
+  Fair = c(0.023, 0.024, 0.211, 0.022, 0.023, 0.035, 0.121, 0.043),
+  Good = c(0.216, 0.233, 0.254, 0.2375, 0.227, 0.211, 0.061, 0.151),
+  Very_Good = c(0.752, 0.736, 0.465, 0.737, 0.75, 0.754, 0.697, 0.803)
+)
+
+#libraries
+library(ggplot2)
+library(tidyr)
+library(ggrepel)
+library(gridExtra)
+library(ggplot2)
+library(patchwork)
+
+# Reshape the data frame into long format
+UA_long <- tidyr::pivot_longer(UA, cols = c(Very_Poor, Poor, Fair, Good, Very_Good), names_to = "Rating", values_to = "Percentage")
+
+pie_charts <- lapply(seq_len(nrow(UA)), function(i) {
+  p <- ggplot(UA_long[UA_long$activity == UA$activity[i], ], aes(x = "", y = Percentage, fill = Rating)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar(theta = "y") +
+    labs(title = UA$activity[i]) +
+    theme_void() +
+    scale_fill_brewer(palette = "Set3") + # Choose color palette
+    geom_label_repel(aes(label = label), position = position_stack(vjust = 0.5)) + # Add labels
+    theme()
+  print(p)
+})
+
+# Create pie charts for all activities
+pie_charts <- lapply(seq_len(nrow(UA)), function(i) {
+  p <- ggplot(UA_long[UA_long$activity == UA$activity[i], ], aes(x = "", y = Percentage, fill = Rating)) +
+    geom_bar(stat = "identity", width = 1) +
+    geom_text(aes(label = paste0(round(Percentage * 100, 1), "%"),
+                  x = 0.5 * cos((cumsum(Percentage) - 0.5 * Percentage) * 2 * pi),
+                  y = 0.5 * sin((cumsum(Percentage) - 0.5 * Percentage) * 2 * pi)),
+              size = 3) + # Adjust label size
+    coord_polar(theta = "y") +
+    labs(title = UA$activity[i]) +
+    theme_void() +
+    scale_fill_brewer(palette = "Set3") + # Choose color palette
+    theme()
+  print(p)
+})
+
+# Print pie charts
+pie_charts
+
+# Combine all pie charts and collect their legends into one
+combined_plot <- wrap_plots(pie_charts) + plot_layout(guides = 'collect')
+print(combined_plot)
+
+# Create pie charts for all activities and store them in the list
+for (i in seq_len(nrow(UA))) {
+  p <- ggplot(UA_long[UA_long$activity == UA$activity[i], ], aes(x = "", y = Percentage, fill = Rating)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar(theta = "y") +
+    labs(title = UA$activity[i]) +
+    theme_void() +
+    scale_fill_brewer(palette = "Set3") + # Choose color palette
+    theme(legend.position = "none") # Remove legend
+  pie_charts[[i]] <- p
+}
+
+# Create a common legend
+legend <- get_legend(pie_charts[[1]])
+
+# Arrange all pie charts on one page with a common legend
+grid.arrange(
+  arrangeGrob(grobs = pie_charts, ncol = 3),
+  ncol = 2,
+  widths = c(4, 1)
+)
+
+
+# Arrange all pie charts on one page
+grid.arrange(grobs = pie_charts, ncol = 3)
